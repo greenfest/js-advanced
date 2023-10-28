@@ -19,7 +19,7 @@ function addToLocalStorage() {
             product: "Samsung Galaxy Z Fold 3",
             reviews: [
                 {
-                    id: 3,
+                    id: 1,
                     text: "Интересный дизайн, но дорогой.",
                 },
             ],
@@ -29,7 +29,7 @@ function addToLocalStorage() {
             product: "Sony PlayStation 5",
             reviews: [
                 {
-                    id: 4,
+                    id: 1,
                     text: "Люблю играть на PS5, графика на высоте.",
                 },
             ],
@@ -51,8 +51,8 @@ function renderGoods() {
        productElement.addEventListener("click", addReviewsHandler);
        const productReviews = document.createElement("ul");
        productReviews.className = "review-list";
-        productReviews.innerHTML = "";
-        productElement.appendChild(productReviews);
+       productReviews.innerHTML = "";
+       productElement.appendChild(productReviews);
        appElement.appendChild(productElement);
     });
 }
@@ -78,9 +78,48 @@ function addReviewsHandler(e) {
     products[id-1].reviews.forEach(review => {
         const reviewItem = document.createElement('li');
         reviewItem.className = 'review';
-        reviewItem.textContent = review.text;
+        reviewItem.textContent = review.id + ". " + review.text;
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "deleteButton";
+        deleteButton.innerHTML = "Удалить отзыв";
+        deleteButton.addEventListener("click", deleteHandler);
         reviewsList.appendChild(reviewItem);
+        reviewsList.appendChild(deleteButton);
     });
+}
+
+const submitInput = document.querySelector(".submitInput");
+submitInput.addEventListener("click", submitHandler);
+
+function submitHandler() {
+    const productInput = document.getElementById("goodsInput").value;
+    const reviewInput = document.getElementById("text").value;
+    const productList = JSON.parse(localStorage.getItem("reviews"));
+    productList.forEach(product => {
+        if (product.product === productInput) {
+            product.reviews.push({ id: (product.reviews.length) ?  product.reviews[product.reviews.length - 1].id + 1 : 1, text: reviewInput });
+        }
+    });
+    localStorage.setItem("reviews", JSON.stringify(productList));
+    renderGoods();
+    const success = document.querySelector(".success");
+    success.style.display = "";
+}
+
+function deleteHandler(e) {
+    const productId = e.target.parentElement.parentElement
+        .className.split("-").pop();
+    const reviewId = e.target.previousElementSibling
+        .innerHTML.split(".")[0]
+
+    const productList = JSON.parse(localStorage.getItem("reviews"));
+    productList.forEach(product => {
+        if (product.id === Number(productId)) {
+            product.reviews = product.reviews.filter(review => review.id !== Number(reviewId));
+        }
+    });
+    localStorage.setItem("reviews", JSON.stringify(productList));
+    renderGoods();
 }
 
 addToLocalStorage();
